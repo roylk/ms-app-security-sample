@@ -12,13 +12,21 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+   private JwtAuthConverter jwtAuthConverter;
+
+    public SecurityConfig(JwtAuthConverter jwtAuthConverter) {
+        this.jwtAuthConverter = jwtAuthConverter;
+    }
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(ar->ar.anyRequest().authenticated())
-                .oauth2ResourceServer(o2->o2.jwt(Customizer.withDefaults()))
+                //.oauth2ResourceServer(o2->o2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(o2->o2.jwt(jwt->jwt.jwtAuthenticationConverter(jwtAuthConverter)))
                 .headers(h->h.frameOptions(fo->fo.disable()))
-                .csrf(crsf->crsf.ignoringRequestMatchers("*/h2-console/**"))
+                .csrf(crsf->crsf.ignoringRequestMatchers("/h2-console/**"))
                 .build();
 
     }

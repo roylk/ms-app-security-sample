@@ -5,7 +5,6 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.DelegatingJwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
@@ -26,17 +25,17 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
                 jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
                 extractResourceRole(jwt).stream()
         ).collect(Collectors.toSet());
-        return new JwtAuthenticationToken(jwt, authorities, jwt.getClaim("preferred_name"));
+        return new JwtAuthenticationToken(jwt, authorities, jwt.getClaim("preferred_username"));
     }
 
-    private Collection<GrantedAuthority>   extractResourceRole(Jwt jwt){
+    private Collection<GrantedAuthority>  extractResourceRole(Jwt jwt){
         Map<String, Object> realmAccess;
         Collection<String> roles;
         if(jwt.getClaim("realm_access") == null){
             return Set.of();
         }
         realmAccess = jwt.getClaim("realm_access");
-        roles = (Collection<String>) realmAccess.get("role");
+        roles = (Collection<String>) realmAccess.get("roles");
         return roles.stream().map(role ->new SimpleGrantedAuthority(role)).collect(Collectors.toSet());
     }
 }
